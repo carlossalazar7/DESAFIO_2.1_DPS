@@ -1,0 +1,11 @@
+{
+  "expo": {
+    "name": "cotizador-salario",
+    "slug": "cotizador-salario",
+    "version": "1.0.0",
+    "assetBundlePatterns": [
+      "**/*"
+    ]
+  },
+  "name": "cotizador-salario"
+}
