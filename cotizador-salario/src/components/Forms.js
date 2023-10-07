@@ -1,12 +1,10 @@
-import React from 'react';
-import { StyleSheet, TextInput, View } from 'react-native';
-import { Picker } from '@react-native-picker/picker';
-import colors from '../utils/colors';
-import { styles, picketSelectStyles } from "../utils/styles";
+import React, {useState} from 'react';
+import {TextInput, View} from 'react-native';
+import {Picker} from '@react-native-picker/picker';
+import {picketSelectStyles, styles} from "../utils/styles";
 
 export default function Form(props) {
-     const { setNombre, setApellidos, setSalario, setAnios, setCategoria } = props;
-
+    const {setNombre, setApellidos, setSalario, setAnios, setCategoria, categoria} = props;
     return (
         <View style={styles.viewForm}>
             <View style={styles.viewInputs}>
@@ -40,15 +38,17 @@ export default function Form(props) {
             </View>
             <Picker
                 style={picketSelectStyles}
+                selectedValue={categoria}
                 onValueChange={(value) => setCategoria(value)}
                 placeholder={{
                     label: 'Seleccióna una categoria...',
                     value: null,
                 }}>
-                <Picker.Item label="Categoria 1" value="0.15" />
-                <Picker.Item label="Categoria 2" value="0.10" />
-                <Picker.Item label="Categoria 3" value="0.05" />
+                <Picker.Item label="Categoria 1" value="0.15"/>
+                <Picker.Item label="Categoria 2" value="0.10"/>
+                <Picker.Item label="Categoria 3" value="0.05"/>
             </Picker>
         </View>
+
     );
 }
