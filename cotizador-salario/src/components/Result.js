@@ -1,6 +1,7 @@
 import React from 'react';
 import {Text, View} from 'react-native';
 import {styles} from "../utils/styles";
+import {DataResult} from "./DataResult";
 
 export default function Result(props) {
     const {nombre, apellidos, salario, proximoSalario, anios, categoria, errorMessage} = props;
@@ -25,12 +26,3 @@ export default function Result(props) {
     );
 }
 
-function DataResult(props) {
-    const {title, value} = props;
-    return (
-        <View style={styles.value}>
-            <Text>{title}</Text>
-            <Text>{value}</Text>
-        </View>
-    );
-}

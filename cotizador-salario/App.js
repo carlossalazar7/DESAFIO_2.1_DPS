@@ -1,28 +1,28 @@
 import React, {useEffect, useState} from 'react';
-import {SafeAreaView, StatusBar, Text} from 'react-native';
+import {Alert, Modal, Pressable, SafeAreaView, StatusBar, Text, View} from 'react-native';
 import Form from './src/components/Forms';
 import Footer from './src/components/Footer';
 import {styles} from './src/utils/styles';
 import Result from './src/components/Result';
 import AsyncStorage from '@react-native-community/async-storage'
+import {DataResult} from "./src/components/DataResult";
 
 export default function App() {
-
-    const [usuario, setUsuario] = useState([]);
     const [nombre, setNombre] = useState('');
+    const [usuarios, setUsuarios] = useState([]);
     const [apellidos, setApellidos] = useState('');
     const [salario, setSalario] = useState(0);
     const [proximoSalario, setProximoSalario] = useState(null);
     const [anios, setAnios] = useState(0);
     const [categoria, setCategoria] = useState('');
     const [errorMessage, setErrorMessage] = useState('');
+    const [modalVisible, setModalVisible] = useState(false);
 
     useEffect(() => {
-        if (nombre && apellidos && salario && anios && categoria) calculate();
-        else reset();
-    }, [nombre, apellidos, salario, anios, categoria, proximoSalario]);
+        if (nombre && apellidos && salario && anios && categoria) calculate(); else reset();
+    }, [nombre, apellidos, salario, anios, categoria, proximoSalario, usuarios]);
 
-    const calculate = () => {
+    const calculate = async () => {
         reset();
         if (nombre === '') {
             setErrorMessage('Ingrese sus nombres');
@@ -44,30 +44,47 @@ export default function App() {
 
             let incremento = parseInt(categoria * salario) + parseInt(anios * salario);
             setProximoSalario(parseInt(salario) + parseInt(incremento));
-            setUsuario({
+
+            let indice = nombre.substring(0, 2).toLocaleUpperCase() + '-' + apellidos.substring(0, 2).toLocaleUpperCase();
+
+            // const clearAsyncStorage = async() => {
+            //     AsyncStorage.clear();
+            // }
+
+            await AsyncStorage.setItem(indice, JSON.stringify({
                 nombre: nombre,
                 apellidos: apellidos,
                 salario: salario,
                 proximoSalario: proximoSalario,
                 anios: anios,
                 categoria: categoria
-            })
-            let indice = nombre.substring(0, 2) + '-' + apellidos.substring(0, 2)+'-'+anios;
-            AsyncStorage.setItem(indice, JSON.stringify(usuario));
+            }));
+
         }
     };
     const reset = () => {
         setErrorMessage('');
     };
 
-    const verUsuarios = () => {
-        setErrorMessage('');
-    };
+    const verUsuarios = async () => {
 
+        try {
+            const keys = await AsyncStorage.getAllKeys();
+            let users = []
 
-    return (
-        <>
+            for (const key of keys) {
+                const datos = await AsyncStorage.getItem(key);
+                users.push(JSON.parse(datos))
+            }
+            setUsuarios(users);
+            setModalVisible(true);
 
+        } catch (error) {
+            console.error(error)
+        }
+    }
+
+    return (<>
             <StatusBar barStyle="light-content"/>
             <SafeAreaView style={styles.Header}>
                 <Text style={styles.HeadApp}>Cotizador de Salario</Text>
@@ -90,6 +107,36 @@ export default function App() {
             <Footer
                 verUsuarios={verUsuarios}
                 calculate={calculate}/>
-        </>
-    );
+
+            <View style={styles.centeredView}>
+                <Modal
+                    animationType="slide"
+                    transparent={true}
+                    visible={modalVisible}
+                    onRequestClose={() => {
+                        Alert.alert('Modal has been closed.');
+                        setModalVisible(!modalVisible);
+                    }}>
+                    <View style={styles.centeredView}>
+                        <View style={styles.modalView}>
+                            <Text style={styles.modalText}>Usuarios</Text>
+                            <View>
+                                {usuarios.map((e) => <View
+                                    style={{margin: 2, backgroundColor: 'beige', borderWidth: 2, padding: 3}}>
+                                    <DataResult title="Nombre " value={`${e.nombre}`}/>
+                                    <DataResult title="Salario " value={`$ ${e.salario}`}/>
+                                    <DataResult title="Proximo Salario" value={`$ ${e.proximoSalario}`}/>
+                                </View>)}
+                            </View>
+
+                            <Pressable
+                                style={[styles.buttonModal, styles.buttonClose]}
+                                onPress={() => setModalVisible(!modalVisible)}>
+                                <Text style={styles.textStyle}>Cerrar</Text>
+                            </Pressable>
+                        </View>
+                    </View>
+                </Modal>
+            </View>
+        </>);
 }
